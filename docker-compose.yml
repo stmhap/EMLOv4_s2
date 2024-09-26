@@ -1,0 +1,87 @@
+services:
+    #define model architecture
+    model:
+     build:
+      context: .
+      dockerfile: Dockerfile
+     volumes:
+      - mnist:/opt/mount
+     command: ["python", "model.py"]
+     restart: on-failure
+
+
+    train:
+        # train service
+     build:
+      context: .
+      dockerfile: Dockerfile 
+     volumes:
+      - mnist:/opt/mount
+     command: ["python", "train.py"]
+     depends_on:
+      - model
+
+    evaluate:
+        # eval service
+     build: 
+      context: .
+      dockerfile: Dockerfile
+     volumes:
+      - mnist:/opt/mount
+     command: ["python", "eval.py"]
+     depends_on:
+      - train
+
+    infer:
+        # infer service
+     build: 
+      context: .
+      dockerfile: Dockerfile
+     volumes:
+      - mnist:/opt/mount 
+     command: ["python", "infer.py"]
+     depends_on:
+     - evaluate
+
+volumes:
+    # create volumes here
+      mnist:
+
+
+
+# ===============================================================================
+# version: '3.8'
+
+# services:
+#   train:
+#     # Train service
+#     build:
+#       context: .
+#       dockerfile: Dockerfile.train
+#     volumes:
+#       - mnist:/opt/mount
+#       - ./model:/opt/mount/model
+#       - ./data:/opt/mount/data
+
+#   evaluate:
+#     # Evaluate service
+#     build:
+#       context: .
+#       dockerfile: Dockerfile.eval
+#     volumes:
+#       - mnist:/opt/mount
+#       - ./model:/opt/mount/model
+#       - ./data:/opt/mount/data
+
+#   infer:
+#     # Inference service
+#     build:
+#       context: .
+#       dockerfile: Dockerfile.infer
+#     volumes:
+#       - mnist:/opt/mount
+#       - ./data:/opt/mount/data
+#       - ./results:/opt/mount/results
+
+# volumes:
+#   mnist:
